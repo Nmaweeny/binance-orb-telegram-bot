@@ -1,21 +1,30 @@
 import time
 from datetime import datetime, timezone
+from flask import Flask
+import threading
 from universe import get_top10_futures_symbols
 from orb_engine import get_daily_orb, check_breakout
 from notifier import send_telegram
 from config import BINANCE_FAPI
 import requests
 
+app = Flask(__name__)
+
 SYMBOLS = []
 ALERTED = {}
 LAST_REFRESH = 0
 
-def main():
+@app.route('/')
+def health():
+    """Render health check"""
+    return {"status": "running", "symbols": len(SYMBOLS)}, 200
+
+def scanner_loop():
     global SYMBOLS, LAST_REFRESH, ALERTED
-    print("ORB Scanner starting...")
+    print("🚀 ORB Scanner starting...")
 
     SYMBOLS = get_top10_futures_symbols()
-    print(f"Scanning: {SYMBOLS}")
+    print(f"📊 Scanning: {SYMBOLS}")
     LAST_REFRESH = time.time()
 
     while True:
@@ -24,7 +33,7 @@ def main():
 
             if current_time - LAST_REFRESH > 14400:
                 SYMBOLS = get_top10_futures_symbols()
-                print(f"Refreshed symbols: {SYMBOLS}")
+                print(f"🔄 Refreshed symbols: {SYMBOLS}")
                 LAST_REFRESH = current_time
 
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -60,7 +69,7 @@ def main():
                         if alert_key not in ALERTED:
                             send_telegram(symbol, direction, close, level, ts)
                             ALERTED[alert_key] = True
-                            print(f"Alert sent: {symbol} {direction} at {close}")
+                            print(f"🚨 Alert: {symbol} {direction} @ {close}")
 
                 except Exception as e:
                     print(f"Error processing {symbol}: {e}")
@@ -69,11 +78,16 @@ def main():
             time.sleep(30)
 
         except KeyboardInterrupt:
-            print("\nShutting down...")
+            print("\n⏹️ Shutting down...")
             break
         except Exception as e:
             print(f"Main loop error: {e}")
             time.sleep(60)
 
 if __name__ == "__main__":
-    main()
+    # Start scanner in background thread
+    scanner_thread = threading.Thread(target=scanner_loop, daemon=True)
+    scanner_thread.start()
+    
+    # Flask binds to port 5000 (required by Render)
+    app.run(host='0.0.0.0', port=5000, debug=False)
