@@ -1,10 +1,9 @@
 import requests
-import requests
+import time
 from datetime import datetime, timezone
 from config import BINANCE_FAPI
 
-from datetime import datetime, timezone
-from config import BINANCE_FAPI
+def get_daily
 
 def get_daily_orb(symbol):
     """Get OR high/low from first 5m candle of UTC day"""
