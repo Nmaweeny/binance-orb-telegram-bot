@@ -1,4 +1,8 @@
 import requests
+import requests
+from datetime import datetime, timezone
+from config import BINANCE_FAPI
+
 from datetime import datetime, timezone
 from config import BINANCE_FAPI
 
