@@ -2,6 +2,10 @@ import requests
 from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 def send_telegram(symbol, direction, close_price, or_level, timestamp):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print(f"[Telegram disabled] Would send alert: {symbol} {direction} @ {close_price:.4f}")
+        return
+    
     msg = f"""*ORB Breakout: {symbol}*
 Direction: {direction}
 Close: `{close_price:.4f}`
