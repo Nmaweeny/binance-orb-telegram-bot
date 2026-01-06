@@ -18,9 +18,9 @@ def get_top10_futures_symbols():
             reverse=True
         )
 
-        top10 = [pair["symbol"] for pair in sorted_pairs[:10]]
+        top20 = [pair["symbol"] for pair in sorted_pairs[:20]]
 
-        return top10
+        return top20
 
     except Exception as e:
         print(f"Error fetching top symbols: {e}")
